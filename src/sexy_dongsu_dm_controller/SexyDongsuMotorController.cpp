@@ -1,8 +1,8 @@
 #include "sexy_dongsu_dm_controller/SexyDongsuMotorController.h"
 
-namespace sexy::dongsu::moter
+namespace sexy::dongsu::motor
 {
-  using namespace damiao
+  using namespace damiao;
 
   bool Controller::init(SexyDongsuJointInterface *robot_hw, ros::NodeHandle &nh)
   {
@@ -17,15 +17,15 @@ namespace sexy::dongsu::moter
     nh.param<std::vector<double>>("init_kp", init_kp, {0.0,0.0,0.0});
     nh.param<std::vector<double>>("init_kd", init_kd, {3.0,3.0,3.0});
 
-    std::fprintf(stderr,"[%s] <%d> joint loaded\n", ros::this_node::getName().c_str(), (int)joint_names_.size());
+    ROS_INFO("[%s] <%d> joint loaded\n", ros::this_node::getName().c_str(), joint_names_.size());
     if (joint_names_.size() != init_pose.size())
       return false;
     for (int idx = 0; idx <joint_names_.size(); idx++)
     {
-      std::fprintf(stderr,"[%s] name <%s> init\n", ros::this_node::getName().c_str(), (int)joint_names_[idx].c_str());
+      ROS_INFO("[%s] name <%s> init\n", ros::this_node::getName().c_str(), joint_names_[idx].c_str());
       hybridJointHandles_.push_back(robot_hw->getHandle(joint_names_[idx]));
-      init_cmd_[joint_names_[idx]] = SexyDonguCommand({damiao::Control_Mode::POS_VEL_MODE,init_pose[idx],init_vel[idx],0.0});
-      stop_cmd_[joint_names_[idx]] = SexyDonguCommand({damiao::Control_Mode::POS_VEL_MODE,0.0,0.0,0.0});
+      init_cmd_[joint_names_[idx]] = SexyDonguCommand({sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE,init_pose[idx],init_vel[idx],0.0});
+      stop_cmd_[joint_names_[idx]] = SexyDonguCommand({sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE,0.0,0.0,0.0});
       pd_cmd_[joint_names_[idx]] = SexyDonguPDCommand({init_kp[idx],init_kd[idx]});
       joint_map_[joint_names_[idx]] = idx;
     }
@@ -35,11 +35,11 @@ namespace sexy::dongsu::moter
     pub_desired_ = nh.advertise<sensor_msgs::JointState>("/sexy/dongsu/gimbal/recv/desired", 1000);
     pub_parameter_ = nh.advertise<sensor_msgs::JointState>("/sexy/dongsu/gimbal/recv/parameter", 1000);
 
-    all_data_client_   = nh.serviceClient<iahrs_driver::all_data_reset>("/all_data_reset_cmd");
-    euler_init_client_ = nh.serviceClient<iahrs_driver::euler_angle_init>("/euler_angle_init_cmd");
-    euler_reset_client_= nh.serviceClient<iahrs_driver::euler_angle_reset>("/euler_angle_reset_cmd");
-    pose_reset_client_ = nh.serviceClient<iahrs_driver::pose_velocity_reset>("/pose_velocity_reset_cmd");
-    reboot_client_     = nh.serviceClient<iahrs_driver::reboot_sensor>("/reboot_sensor_cmd");
+    all_data_client_   = nh.serviceClient<std_srvs::Empty>("/all_data_reset_cmd");
+    euler_init_client_ = nh.serviceClient<std_srvs::Empty>("/euler_angle_init_cmd");
+    euler_reset_client_= nh.serviceClient<std_srvs::Empty>("/euler_angle_reset_cmd");
+    pose_reset_client_ = nh.serviceClient<std_srvs::Empty>("/pose_velocity_reset_cmd");
+    reboot_client_     = nh.serviceClient<std_srvs::Empty>("/reboot_sensor_cmd");
 
     sub_desired_ = nh.subscribe("/sexy/dongsu/gimbal/desired/control", 1000, &Controller::jointControllCallback, this);
     sub_desired_param_ = nh.subscribe("/sexy/dongsu/gimbal/desired/parameter", 1000, &Controller::jointControllCallback2, this);
@@ -63,15 +63,11 @@ namespace sexy::dongsu::moter
         init_cmd_[kv.first].feedforward,
         init_cmd_[kv.first].mode);
     }
-
-    iahrs_driver::all_data_reset srv1;
-    all_data_client_.call(srv1);
-    iahrs_driver::reboot_sensor srv2;
-    euler_reset_client_.call(srv2);
-    iahrs_driver::pose_velocity_reset srv3;
-    pose_reset_client_.call(srv3);
-    iahrs_driver::euler_angle_init srv4;
-    euler_init_client_.call(srv4);
+    std_srvs::Empty srv;
+    all_data_client_.call(srv);
+    euler_reset_client_.call(srv);
+    pose_reset_client_.call(srv);
+    euler_init_client_.call(srv);
   }
 
   void Controller::update(const ros::Time &time, const ros::Duration &period)
@@ -155,24 +151,24 @@ namespace sexy::dongsu::moter
       std::lock_guard<std::mutex> lock(sexy_dongsu_mutex_);
       desired_cmd_ = std::make_shared<std::map<std::string,SexyDonguCommand>>();
     }
-    damiao::Control_Mode mode;
+    sexy::dongsu::motor::hardware::Control_Mode mode;
     std::vector<double> position(joint_num,0.0);
     std::vector<double> velocity(joint_num,0.0);
     std::vector<double> feedforward(joint_num,0.0);
     if(prefix == 1)
     {
-      mode = damiao::Control_Mode::VEL_MODE;
+      mode = sexy::dongsu::motor::hardware::Control_Mode::VEL_MODE;
       velocity = msg->velocity;
     }
     else if(prefix == 2)
     {
-      mode = damiao::Control_Mode::POS_VEL_MODE;
+      mode = sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE;
       velocity = msg->velocity;
       position = msg->position;
     }
     else if(prefix == 3)
     {
-      mode = damiao::Control_Mode::MIT_MODE;
+      mode = sexy::dongsu::motor::hardware::Control_Mode::MIT_MODE;
       velocity = msg->velocity;
       position = msg->position;
       feedforward = msg->effort;
@@ -217,7 +213,7 @@ namespace sexy::dongsu::moter
 
   void Controller::imuResetCallback(const geometry_msgs::PointStamped::ConstPtr& msg)
   {
-    iahrs_driver::reboot_sensor srv;
+    std_srvs::Empty srv;
     reboot_client_.call(srv);
   }
 
@@ -234,11 +230,11 @@ namespace sexy::dongsu::moter
 
   void Controller::endCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
   {
-    iahrs_driver::reboot_sensor srv;
+    std_srvs::Empty srv;
     reboot_client_.call(srv);
     stopping(msg->header.stamp);
   }
 }
 
 
-PLUGINLIB_EXPORT_CLASS(damiao::Controller, controller_interface::ControllerBase);
+PLUGINLIB_EXPORT_CLASS(sexy::dongsu::motor::Controller, controller_interface::ControllerBase);

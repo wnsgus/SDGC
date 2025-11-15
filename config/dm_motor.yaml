@@ -1,0 +1,25 @@
+serials: 
+  serial0_info:
+    port: /dev/ttyACM0
+    baudrate: 921600
+
+
+dm_actuators:
+  yaw_joint:
+    port: /dev/ttyACM0
+    type: DM4310
+    can_id: 0x01
+    mst_id: 0x00
+  
+  pitch_joint:
+    port: /dev/ttyACM0
+    type: DM4310
+    can_id: 0x02
+    mst_id: 0x12
+  
+  roll_joint:
+    port: /dev/ttyACM0
+    type: DM4310
+    can_id: 0x03
+    mst_id: 0x33
+  

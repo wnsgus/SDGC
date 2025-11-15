@@ -1,21 +1,21 @@
 <launch>
-    <rosparam file="$(find dm_controllers)/config/dongsu.yaml" command="load" ns="damiao"/>
-    <rosparam file="$(find dm_hw)/config/dm_loop.yaml" command="load" ns="damiao"/>
+    <rosparam file="$(find sexy_dongsu_gimbal_controller)/config/dm_motor.yaml" command="load" ns="damiao"/>
+    <rosparam file="$(find sexy_dongsu_gimbal_controller)/config/dm_loop.yaml" command="load" ns="damiao"/>
 
-    <node name="dm_main" pkg="dm_main" type="dm_main" respawn="false" 
+    <node name="sexy_dongsu_gimbal_controller" pkg="sexy_dongsu_gimbal_controller" type="sexy_dongsu_dm_controller_node" respawn="false" 
     clear_params="true" />
     
-    <rosparam file="$(find dm_controllers)/config/controllers.yaml" command="load" />
+    <rosparam file="$(find sexy_dongsu_gimbal_controller)/config/controllers.yaml" command="load" />
     <node name="controller_loader" pkg="controller_manager" type="spawner"
-          output="screen" args="sexy/dongsu/gimbal/DmController"/>
+          output="screen" args="controllers/dongsu"/>
 
-    <include file="$(find iahrs_driver)/launch/iahrs_driver.launch">
+    <!-- <include file="$(find iahrs_driver)/launch/iahrs_driver.launch">
     </include>
 
     <include file="$(find gimbal_v2)/launch/display.launch">
     </include>
 
     <include file="$(find ilidar)/launch/stream.launch">
-    </include>
+    </include> -->
 
 </launch>

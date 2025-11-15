@@ -51,12 +51,36 @@ catkin_package(
   dm_common
   dm_controllers
   dm_hw
+  serial
 )
-add_library(${PROJECT_NAME} src/SexyDongsuMotorController.cpp src/SexyDongsuHW.cpp)
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+add_library(dongsu_motor_controller src/sexy_dongsu_dm_controller/SexyDongsuMotorController.cpp 
+                            src/sexy_dongsu_dm_controller/SexyDongsuHW.cpp)
+target_link_libraries(dongsu_motor_controller ${catkin_LIBRARIES})
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+include_directories(
+ # include
+  ${catkin_INCLUDE_DIRS}
+)
+
+add_executable(sexy_dongsu_dm_controller_node
+        src/sexy_dongsu_dm_controller/SexyDongsuHW.cpp
+        src/sexy_dongsu_dm_controller/SexyDongsuHWLoop.cpp
+        src/sexy_dongsu_dm_controller/SexyDongsuMotor.cpp
+        src/sexy_dongsu_motor_node.cpp
+        )
+
+target_link_libraries(sexy_dongsu_dm_controller_node
+        ${catkin_LIBRARIES} 
+        )
+add_executable(sexy_dongsu_dm_imu_node
+        src/sexy_dongsu_imu_node.cpp
+        )
+
+target_link_libraries(sexy_dongsu_dm_imu_node
+        ${catkin_LIBRARIES} 
+        )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -159,7 +183,6 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  /home/cnrlab/catkin_ws/devel/include
 )
 
 ## Declare a C++ library

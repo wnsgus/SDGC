@@ -15,20 +15,15 @@
 #include <dm_hw/DmHW.h>
 #include <dm_hw/DmHWLoop.h>
 #include <std_msgs/Bool.h>
-#include <dm_hw/damiao.h>
 
 #include "sexy_dongsu_dm_controller/SexyDongsuJointInterface.h"
+#include "sexy_dongsu_dm_controller/SexyDongsuMotor.h"
 
 
 
-namespace sexy::dongsu::moter::hardware
+namespace sexy::dongsu::motor::hardware
 {
 using namespace damiao;
-
-struct SexyDongsuData : public damiao::DmActData
-{
-  damiao::Control_Mode mode;
-};
 
 class SexyDongsuHW : public damiao::DmHW
 {
@@ -51,8 +46,8 @@ public:
   ros::Subscriber sub_;
 protected:
   DM_Motor_Type motorType;
-  std::vector<std::shared_ptr<Motor_Control>> motor_ports_{};
-  std::unordered_map<std::string,  std::unordered_map<int,SexyDongsuData>> port_id2dm_data_{};
+  std::vector<std::shared_ptr<sexy::dongsu::motor::hardware::Motor_Control>> motor_ports_{};
+  std::unordered_map<std::string,  std::unordered_map<int,sexy::dongsu::motor::hardware::SexyDongsuData>> port_id2dm_data_{};
 
   // Interface
   hardware_interface::JointStateInterface jointStateInterface_;  

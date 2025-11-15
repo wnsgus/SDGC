@@ -1,7 +1,8 @@
 #include <xmlrpcpp/XmlRpcException.h>
 #include "sexy_dongsu_dm_controller/SexyDongsuHW.h"
+#include "sexy_dongsu_dm_controller/SexyDongsuMotor.h"
 
-namespace sexy::dongsu::moter::hardware
+namespace sexy::dongsu::motor::hardware
 {
 
 bool SexyDongsuHW::parseSexyDongsuData(XmlRpc::XmlRpcValue& act_datas, ros::NodeHandle& robot_hw_nh)
@@ -77,25 +78,27 @@ bool SexyDongsuHW::parseSexyDongsuData(XmlRpc::XmlRpcValue& act_datas, ros::Node
       }
       else
       {
-        port_id2dm_data_[port].insert(std::make_pair(can_id, SexyDongsuData{
-                                                                 .mode = damiao::Control_Mode::POS_VEL_MODE,
-                                                                 .name = it->first,                                                             
-                                                                 .motorType = motorType,
-                                                                 .can_id=can_id,
-                                                                 .mst_id=mst_id,
-                                                                 .pos = 0,
-                                                                 .vel = 0,
-                                                                 .effort = 0,
-                                                                 .cmd_pos = 0,
-                                                                 .cmd_vel = 0,
-                                                                 .cmd_effort = 0 }));
+        SexyDongsuData data;
+        data.name = it->first;
+        data.motorType = motorType;
+        data.can_id=can_id;
+        data.mst_id=mst_id;
+        data.pos = 0;
+        data.vel = 0;
+        data.effort = 0;
+        data.cmd_pos = 0;
+        data.cmd_vel = 0;
+        data.cmd_effort = 0;
+        data.mode = sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE;
+
+        port_id2dm_data_[port].insert(std::make_pair(can_id,data));
       }
       // for ros_control interface
       hardware_interface::JointStateHandle state_handle(port_id2dm_data_[port][can_id].name, &port_id2dm_data_[port][can_id].pos,
                                                         &port_id2dm_data_[port][can_id].vel,
                                                         &port_id2dm_data_[port][can_id].effort);
       jointStateInterface_.registerHandle(state_handle);
-      hybridJointInterface_.registerHandle(sexy::dongsu::moter::SexyDongsuJointHandle(state_handle, &port_id2dm_data_[port][can_id].cmd_pos,
+      hybridJointInterface_.registerHandle(sexy::dongsu::motor::SexyDongsuJointHandle(state_handle, &port_id2dm_data_[port][can_id].cmd_pos,
                                                            &port_id2dm_data_[port][can_id].cmd_vel, &port_id2dm_data_[port][can_id].kp,
                                                            &port_id2dm_data_[port][can_id].kd, &port_id2dm_data_[port][can_id].cmd_effort, &port_id2dm_data_[port][can_id].mode));
     }
@@ -118,7 +121,7 @@ bool SexyDongsuHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
   registerInterface(&jointStateInterface_);
   registerInterface(&hybridJointInterface_);
 
-  if (!robot_hw_nh.getParam("dm_actuators", xml_rpc_value))
+  if (!robot_hw_nh.getParam("/sexy_dongsu_actuators", xml_rpc_value))
     ROS_WARN("No dm_actuators specified");
   else if (!parseDmActData(xml_rpc_value, robot_hw_nh))
     return false;
@@ -143,7 +146,7 @@ bool SexyDongsuHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
       int baudrate = static_cast<int>(xml_rpc_value[it->first]["baudrate"]);
       std::cerr << "Serials " << it->first << " port: " << port << " baudrate: " << baudrate << std::endl;
 
-      motor_ports_.push_back(std::make_shared<Motor_Control>(port,baudrate,&port_id2dm_data_[port]));
+      motor_ports_.push_back(std::make_shared<sexy::dongsu::motor::hardware::Motor_Control>(port,baudrate,&port_id2dm_data_[port]));
     } 
   }
   return true;

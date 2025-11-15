@@ -1,5 +1,5 @@
-<library path="lib/libsexy_dongsu_gimber_controller">
-  <class name="sexy/dongsu/motor/Controller" type="sexy::dongsu::motor::Controller" base_class_type="controller_interface::ControllerBase">
+<library path="lib/libdongsu_motor_controller">
+  <class name="damiao/Controller" type="sexy::dongsu::motor::Controller" base_class_type="controller_interface::ControllerBase">
     <description>
       Dongsu was beautiful.
     </description>

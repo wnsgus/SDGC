@@ -12,25 +12,9 @@
 #include <vector>
 #include <optional>
 
-#include <iahrs_driver/all_data_reset.h>
-#include <iahrs_driver/all_data_resetRequest.h>
-#include <iahrs_driver/all_data_resetResponse.h>
-
-#include <iahrs_driver/euler_angle_init.h>
-#include <iahrs_driver/euler_angle_initRequest.h>
-#include <iahrs_driver/euler_angle_initResponse.h>
-
-#include <iahrs_driver/euler_angle_reset.h>
-#include <iahrs_driver/euler_angle_resetRequest.h>
-#include <iahrs_driver/euler_angle_resetResponse.h>
-
-#include <iahrs_driver/pose_velocity_reset.h>
-#include <iahrs_driver/pose_velocity_resetRequest.h>
-#include <iahrs_driver/pose_velocity_resetResponse.h>
-
-#include <iahrs_driver/reboot_sensor.h>
-#include <iahrs_driver/reboot_sensorRequest.h>
-#include <iahrs_driver/reboot_sensorResponse.h>
+#include <std_srvs/Empty.h>
+#include <std_srvs/EmptyResponse.h>
+#include <std_srvs/EmptyRequest.h>
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -38,13 +22,14 @@
 #include <mutex>
 #include <cstdio>
 #include "sexy_dongsu_dm_controller/SexyDongsuJointInterface.h"
+#include "sexy_dongsu_dm_controller/SexyDongsuMotor.h"
 
-namespace sexy::dongsu::moter
+namespace sexy::dongsu::motor
 {
 using namespace damiao;
 typedef struct 
 {
-  damiao::Control_Mode mode;
+  sexy::dongsu::motor::hardware::Control_Mode mode;
   double position;
   double velocity;
   double feedforward;
@@ -58,7 +43,7 @@ typedef struct
 
 typedef struct 
 {
-  damiao::Control_Mode mode;
+  sexy::dongsu::motor::hardware::Control_Mode mode;
   double position;
   double position_desired;
   double velocity;
