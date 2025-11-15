@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Gimbal_v2 URDF (LiDAR 시각화 제거 버전) -->
+<robot name="gimbal_v2">
+
+  <!-- World to Fixed Base -->
+  <link name="base_link"/>
+
+  <joint name="base_link_fixed_base" type="fixed">
+    <parent link="base_link" />
+    <child link="fixed_base" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+
+  <!-- Fixed Base -->
+  <link name="fixed_base">
+    <inertial>
+      <origin xyz="-7.1313E-36 -0.030507 -1.4002E-19" rpy="0 0 0"/>
+      <mass value="2.9033"/>
+      <inertia ixx="0.011896" ixy="-2.0565E-35" ixz="-4.7383E-36"
+               iyy="0.021993" iyz="1.2665E-21" izz="0.011896"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/fixed_base.STL"/>
+      </geometry>
+      <material name=""><color rgba="0.79216 0.81961 0.93333 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/fixed_base.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Yaw Base -->
+  <link name="yaw_base">
+    <inertial>
+      <origin xyz="2.6208E-17 0.12662 7.3534E-17" rpy="0 0 0"/>
+      <mass value="9.0745"/>
+      <inertia ixx="0.11528" ixy="-9.1374E-19" ixz="-1.0588E-18"
+               iyy="0.33067" iyz="-4.6784E-18" izz="0.39263"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/yaw_base.STL"/>
+      </geometry>
+      <material name=""><color rgba="0.79216 0.81961 0.93333 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/yaw_base.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="yaw_joint" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <parent link="fixed_base"/>
+    <child link="yaw_base"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-2.61" upper="2.61" effort="0" velocity="0"/>
+  </joint>
+
+  <!-- Pitch Link -->
+  <link name="pitch_link">
+    <inertial>
+      <origin xyz="7.903E-15 3.8858E-16 -0.03104" rpy="0 0 0"/>
+      <mass value="14.248"/>
+      <inertia ixx="0.32194" ixy="-5.3829E-18" ixz="-3.8044E-15"
+               iyy="0.4275" iyz="-5.6668E-17" izz="0.40979"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/pitch_link.STL"/>
+      </geometry>
+      <material name=""><color rgba="0.79216 0.81961 0.93333 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/pitch_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="pitch_joint" type="revolute">
+    <origin xyz="0 0.094 0.136" rpy="0 0 0"/>
+    <parent link="yaw_base"/>
+    <child link="pitch_link"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+
+  <!-- Roll Link -->
+  <link name="roll_link">
+    <inertial>
+      <origin xyz="-5.4043E-15 -0.00018127 0.001435" rpy="0 0 0"/>
+      <mass value="23.808"/>
+      <inertia ixx="0.3599" ixy="6.785E-19" ixz="3.2485E-18"
+               iyy="0.35935" iyz="0.00071459" izz="0.26868"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/roll_link.STL"/>
+      </geometry>
+      <material name=""><color rgba="0.79216 0.81961 0.93333 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://gimbal_v2/meshes/roll_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="roll_joint" type="revolute">
+    <origin xyz="0 -0.094 0" rpy="0 0 0"/>
+    <parent link="pitch_link"/>
+    <child link="roll_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.57" upper="1.57" effort="0" velocity="0"/>
+  </joint>
+
+  
+  <!-- LiDAR Link (시각화 없음) -->
+  <link name="lidar_link"/>
+
+  <!-- roll_link → lidar_link Joint -->
+  <joint name="lidar_mount_joint" type="fixed">
+    <origin xyz="0.047 0 0" rpy="0 0 0"/>
+    <parent link="roll_link"/>
+    <child link="lidar_link"/>
+  </joint>
+
+  <link name="imu_link"/>
+
+  <joint name="imu_mount_joint" type="fixed">
+    <origin xyz="0 0 0.02" rpy="0 0 0"/>
+    <parent link="lidar_link"/>
+    <child link="imu_link"/>
+  </joint>
+
+</robot>
+

@@ -10,20 +10,23 @@ namespace sexy::dongsu::motor
     std::vector<double> init_vel;
     std::vector<double> init_kp;
     std::vector<double> init_kd;
-    
-    nh.param<std::vector<std::string>>("joint_names", joint_names_, std::vector<std::string>{"yaw_joint", "pitch_joint", "roll_joint"});
-    nh.param<std::vector<double>>("init_poses", init_pose, std::vector<double>{1.31, 0.085, 2.0});
-    nh.param<std::vector<double>>("init_poses", init_vel, std::vector<double>{2.0, 2.0, 2.0});
-    nh.param<std::vector<double>>("init_kp", init_kp, {0.0,0.0,0.0});
-    nh.param<std::vector<double>>("init_kd", init_kd, {3.0,3.0,3.0});
+    ros::NodeHandle pnh("sexy_dongsu");
+    pnh.param<std::vector<std::string>>("joint_names", joint_names_, std::vector<std::string>{"yaw_joint", "pitch_joint", "roll_joint"});
+    pnh.param<std::vector<double>>("init_pose", init_pose, std::vector<double>{1.31, 0.085, 2.0});
+    pnh.param<std::vector<double>>("init_vel", init_vel, std::vector<double>{0.1, 0.1, 0.1});
+    pnh.param<std::vector<double>>("init_kp", init_kp, {0.05,0.05,0.05});
+    pnh.param<std::vector<double>>("init_kd", init_kd, {0.025,0.025,0.025});
 
     ROS_INFO("[%s] <%d> joint loaded\n", ros::this_node::getName().c_str(), joint_names_.size());
     if (joint_names_.size() != init_pose.size())
       return false;
     for (int idx = 0; idx <joint_names_.size(); idx++)
     {
+      std::cerr <<joint_names_[idx]<<std::endl;
       ROS_INFO("[%s] name <%s> init\n", ros::this_node::getName().c_str(), joint_names_[idx].c_str());
       hybridJointHandles_.push_back(robot_hw->getHandle(joint_names_[idx]));
+      std::cerr <<joint_names_[idx]<<std::endl;
+
       init_cmd_[joint_names_[idx]] = SexyDonguCommand({sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE,init_pose[idx],init_vel[idx],0.0});
       stop_cmd_[joint_names_[idx]] = SexyDonguCommand({sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE,0.0,0.0,0.0});
       pd_cmd_[joint_names_[idx]] = SexyDonguPDCommand({init_kp[idx],init_kd[idx]});
@@ -31,7 +34,7 @@ namespace sexy::dongsu::motor
     }
 
 
-    pub_state_ = nh.advertise<sensor_msgs::JointState>("/sexy/dongsu/gimbal/recv/state", 1000);
+    pub_state_ = nh.advertise<sensor_msgs::JointState>("/joint_states", 1000);
     pub_desired_ = nh.advertise<sensor_msgs::JointState>("/sexy/dongsu/gimbal/recv/desired", 1000);
     pub_parameter_ = nh.advertise<sensor_msgs::JointState>("/sexy/dongsu/gimbal/recv/parameter", 1000);
 

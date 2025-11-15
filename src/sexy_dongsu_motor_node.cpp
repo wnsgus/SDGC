@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "dongsu");
+  ros::init(argc, argv, "damiao");
   ros::NodeHandle nh;
   ros::NodeHandle robot_hw_nh("damiao");
 

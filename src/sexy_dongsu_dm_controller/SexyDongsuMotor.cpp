@@ -468,7 +468,15 @@ void Motor_Control::write()
        std::cerr<<"pos: "<<m.second.cmd_pos<<" vel: "<<m.second.cmd_vel<<" effort: "<<m.second.cmd_effort<<std::endl;
        std::cerr<<"kp: "<<m.second.kp<<" kd: "<<m.second.kd<<std::endl;
        std::cerr<<"finishe write"<<std::endl;*/
-       control_mit(*it, m.second.kp, m.second.kd,m.second.cmd_pos, m.second.cmd_vel, m.second.cmd_effort); // control_mit(Motor &DM_Motor, float kp, float kd, float q, float dq, float tau)
+       switchControlMode(*it,m.second.mode);
+       if(m.second.mode == sexy::dongsu::motor::hardware::Control_Mode::POS_VEL_MODE)
+            control_pos_vel(*it, m.second.cmd_pos, m.second.cmd_vel); // control_mit(Motor &DM_Motor, float kp, float kd, float q, float dq, float tau)
+
+       else if(m.second.mode == sexy::dongsu::motor::hardware::Control_Mode::VEL_MODE)
+            control_vel(*it, m.second.cmd_vel); // control_mit(Motor &DM_Motor, float kp, float kd, float q, float dq, float tau)
+
+       else if(m.second.mode == sexy::dongsu::motor::hardware::Control_Mode::MIT_MODE)
+            control_mit(*it, m.second.kp, m.second.kd,m.second.cmd_pos, m.second.cmd_vel, m.second.cmd_effort); // control_mit(Motor &DM_Motor, float kp, float kd, float q, float dq, float tau)
     }
 }
 
@@ -488,9 +496,6 @@ void Motor_Control::read()
         m.second.pos=  it->Get_Position();
         m.second.vel=  it->Get_Velocity();
         m.second.effort= it->Get_tau();
-
-        std::cerr<<"MotorType: "<<motor_id<<std::endl;
-        std::cerr<<"pos: "<<m.second.pos<<" vel: "<<m.second.vel<<" effort: "<<m.second.effort<<std::endl;  
     }
 }
 

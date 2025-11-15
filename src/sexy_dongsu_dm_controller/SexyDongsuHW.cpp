@@ -121,9 +121,9 @@ bool SexyDongsuHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh)
   registerInterface(&jointStateInterface_);
   registerInterface(&hybridJointInterface_);
 
-  if (!robot_hw_nh.getParam("/sexy_dongsu_actuators", xml_rpc_value))
+  if (!robot_hw_nh.getParam("dm_actuators", xml_rpc_value))
     ROS_WARN("No dm_actuators specified");
-  else if (!parseDmActData(xml_rpc_value, robot_hw_nh))
+  else if (!parseSexyDongsuData(xml_rpc_value, robot_hw_nh))
     return false;
   
   if (!robot_hw_nh.getParam("serials", xml_rpc_value))

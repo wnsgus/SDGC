@@ -2,20 +2,30 @@
     <rosparam file="$(find sexy_dongsu_gimbal_controller)/config/dm_motor.yaml" command="load" ns="damiao"/>
     <rosparam file="$(find sexy_dongsu_gimbal_controller)/config/dm_loop.yaml" command="load" ns="damiao"/>
 
+
+
+    <param name="robot_description" textfile="$(find sexy_dongsu_gimbal_controller)/urdf/gimbal_v2.urdf" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    
     <node name="sexy_dongsu_gimbal_controller" pkg="sexy_dongsu_gimbal_controller" type="sexy_dongsu_dm_controller_node" respawn="false" 
     clear_params="true" />
-    
+
     <rosparam file="$(find sexy_dongsu_gimbal_controller)/config/controllers.yaml" command="load" />
     <node name="controller_loader" pkg="controller_manager" type="spawner"
-          output="screen" args="controllers/dongsu"/>
+          output="screen" args="controllers/dm_controller"/>
+          
 
-    <!-- <include file="$(find iahrs_driver)/launch/iahrs_driver.launch">
-    </include>
+    <node pkg="imu_transformer" type="imu_transformer_node" name="imu_data_transformer" output="screen">
+        <remap from="imu_in" to="imu"/>
+        <remap from="imu_out" to="sexy/dongsu/imu"/>
+        <param name="target_frame" value="lidar_link"/>
+    </node>
 
-    <include file="$(find gimbal_v2)/launch/display.launch">
-    </include>
 
-    <include file="$(find ilidar)/launch/stream.launch">
+    <param name="m_bSingle_TF_option" type="bool" value="false" /> 
+    <node pkg="sexy_dongsu_gimbal_controller" type="sexy_dongsu_dm_imu_node" name="sexy_dongsu_dm_imu_node" output="screen" />
+
+    <!-- <include file="$(find ilidar)/launch/stream.launch">
     </include> -->
 
 </launch>
