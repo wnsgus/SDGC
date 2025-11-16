@@ -58,7 +58,7 @@
   </link>
 
   <joint name="yaw_joint" type="revolute">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 -1.31"/>
     <parent link="fixed_base"/>
     <child link="yaw_base"/>
     <axis xyz="0 0 1"/>
@@ -89,7 +89,7 @@
   </link>
 
   <joint name="pitch_joint" type="revolute">
-    <origin xyz="0 0.094 0.136" rpy="0 0 0"/>
+    <origin xyz="0 0.094 0.136" rpy="0 0 -0.085"/>
     <parent link="yaw_base"/>
     <child link="pitch_link"/>
     <axis xyz="0 0 1"/>
@@ -120,7 +120,7 @@
   </link>
 
   <joint name="roll_joint" type="revolute">
-    <origin xyz="0 -0.094 0" rpy="0 0 0"/>
+    <origin xyz="0 -0.094 0" rpy="-2 0 0"/>
     <parent link="pitch_link"/>
     <child link="roll_link"/>
     <axis xyz="1 0 0"/>

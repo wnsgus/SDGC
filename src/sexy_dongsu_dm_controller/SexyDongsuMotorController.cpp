@@ -10,12 +10,12 @@ namespace sexy::dongsu::motor
     std::vector<double> init_vel;
     std::vector<double> init_kp;
     std::vector<double> init_kd;
-    ros::NodeHandle pnh("sexy_dongsu");
-    pnh.param<std::vector<std::string>>("joint_names", joint_names_, std::vector<std::string>{"yaw_joint", "pitch_joint", "roll_joint"});
-    pnh.param<std::vector<double>>("init_pose", init_pose, std::vector<double>{1.31, 0.085, 2.0});
-    pnh.param<std::vector<double>>("init_vel", init_vel, std::vector<double>{0.1, 0.1, 0.1});
-    pnh.param<std::vector<double>>("init_kp", init_kp, {0.05,0.05,0.05});
-    pnh.param<std::vector<double>>("init_kd", init_kd, {0.025,0.025,0.025});
+    ros::NodeHandle pnh("damiao");
+    pnh.param<std::vector<std::string>>("/joint_names", joint_names_, std::vector<std::string>{"yaw_joint", "pitch_joint", "roll_joint"});
+    pnh.param<std::vector<double>>("/init_pose", init_pose, std::vector<double>{1.31, 0.085, 2.0});
+    pnh.param<std::vector<double>>("/init_vel", init_vel, std::vector<double>{2.0, 2.0, 2.0});
+    pnh.param<std::vector<double>>("/init_kp", init_kp, {0.05,0.05,0.05});
+    pnh.param<std::vector<double>>("/init_kd", init_kd, {0.025,0.025,0.025});
 
     ROS_INFO("[%s] <%d> joint loaded\n", ros::this_node::getName().c_str(), joint_names_.size());
     if (joint_names_.size() != init_pose.size())
@@ -77,7 +77,6 @@ namespace sexy::dongsu::motor
   {
     sensor_msgs::JointState state_msg;
     state_msg.header.stamp = time; 
-
     sensor_msgs::JointState desired_msg;
     sensor_msgs::JointState parameter_msg;
     for (auto &kv : joint_map_)
@@ -122,20 +121,21 @@ namespace sexy::dongsu::motor
 
       desired_msg.position.push_back(recv_cmd_[kv.first].position_desired);
       desired_msg.velocity.push_back(recv_cmd_[kv.first].velocity_desired);
-      desired_msg.velocity.push_back(recv_cmd_[kv.first].feedforward);
+      desired_msg.effort.push_back(recv_cmd_[kv.first].feedforward);
 
       parameter_msg.position.push_back(recv_cmd_[kv.first].kp);
       parameter_msg.velocity.push_back(recv_cmd_[kv.first].kd);
       parameter_msg.effort.push_back(recv_cmd_[kv.first].feedforward);
+      if(desired_cmd_)
+        last_cmd_ = std::make_shared<std::map<std::string,SexyDonguCommand>>(*desired_cmd_);
+      
       {
         std::lock_guard<std::mutex> lock(sexy_dongsu_mutex_);
         desired_cmd_.reset();
       }
-    if(!last_cmd_)
-      last_cmd_ = std::make_shared<std::map<std::string,SexyDonguCommand>>();
-    last_cmd_ = desired_cmd_;
 
     }
+
     pub_state_.publish(state_msg);
     pub_desired_.publish(desired_msg);
     pub_parameter_.publish(parameter_msg);
@@ -180,10 +180,10 @@ namespace sexy::dongsu::motor
       std::lock_guard<std::mutex> lock(sexy_dongsu_mutex_);
       for(auto &n : msg->name)
       {
-          desired_cmd_->at(n).mode = mode;
-          desired_cmd_->at(n).position = position[joint_map_[n]];
-          desired_cmd_->at(n).velocity = velocity[joint_map_[n]];
-          desired_cmd_->at(n).feedforward = feedforward[joint_map_[n]];
+          (*desired_cmd_)[n].mode = mode;
+          (*desired_cmd_)[n].position = position[joint_map_[n]];
+          (*desired_cmd_)[n].velocity = velocity[joint_map_[n]];
+          (*desired_cmd_)[n].feedforward = feedforward[joint_map_[n]];
       }
     }
 
